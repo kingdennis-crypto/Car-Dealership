@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./Payment.sol";
-
 // TODO: Create a seperate contract for car types
 contract Dealership {
   uint256 COMMISION_FOR_CAR = 0.1 ether;
-
-  Payment private payment;
 
   string name;
 
@@ -39,6 +35,31 @@ contract Dealership {
 
   constructor(string memory _name) {
     name = _name;
+
+    Car memory car1 = Car(
+      0x498C2f07f3C28A5EE65c3Cc723Bed64B9EeaA88f,
+      "28-TGJ-1",
+      123,
+      "Ford",
+      "SUV",
+      "red",
+      1024,
+      "213"
+    );
+
+    Car memory car2 = Car(
+      0x498C2f07f3C28A5EE65c3Cc723Bed64B9EeaA88f,
+      "28-TGJ-1",
+      123,
+      "Ford",
+      "SUV",
+      "red",
+      1024,
+      "213"
+    );
+
+    cars.push(car1);
+    cars.push(car2);
   }
 
   /// @notice Create a car on this contract
@@ -133,11 +154,11 @@ contract Dealership {
   }
 
   /// @notice Function to buy a car from an owner
-  function buyCar() public {
-    address payable _to = payable(0x9A52E9cd2b6FafEb2876d63eB9Cda109E45ecE67);
-    uint256 _amount = 1 ether;
+  // function buyCar() public {
+  //   address payable _to = payable(0x9A52E9cd2b6FafEb2876d63eB9Cda109E45ecE67);
+  //   uint256 _amount = 1 ether;
 
-    // payment.sendPayment{value: _amount}(_to, _amount);
-    payment.transferMoney(_to, _amount);
-  }
+  //   // payment.sendPayment{value: _amount}(_to, _amount);
+  //   // payment.transferMoney(_to, _amount);
+  // }
 }
