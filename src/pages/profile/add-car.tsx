@@ -1,7 +1,53 @@
-import Head from 'next/head';
+import FileField from '@/components/input/FileField'
+import InputField from '@/components/input/InputField'
+import Car from '@/models/car'
+import Head from 'next/head'
+import { useEffect, useState } from 'react'
 
+import { ethers } from 'ethers'
+import useWallet from '@/hooks/useWallet'
+import useContract from '@/hooks/useContract'
+
+import abi from '../../../contract/build/contracts/CarDealership.json'
+import useEthers from '@/hooks/useEthers'
+const addres = process.env.DEALERSHIP_CONTRACT!
+
+const defaultCar = new Car('', '28-TGJ-1', 123, 'Ford', 'SUV', 'red', 1024, '')
 
 export default function AddCar() {
+  const contract = useEthers(addres, abi.abi)
+  const wallet = useWallet()
+
+  const [car, setCar] = useState<Car>(defaultCar)
+
+  // TODO: Add multi image support
+  const [file, setFile] = useState<File | undefined>(undefined)
+
+  async function mintCar() {
+    const _owner = await wallet.getAddress()
+
+    // const _car = await contract.callContractFunction(
+    //   'safeMint',
+    //   _owner,
+    //   car.licensePlate,
+    //   car.chassisNumber,
+    //   car.brand,
+    //   car.carType,
+    //   car.colour,
+    //   car.mileage,
+    //   car.imageUrl
+    // )
+
+    const _car = await contract.callContractFunction(
+      'mintCar',
+      _owner,
+      'License Plate',
+      'Brand'
+    )
+
+    console.log(_car)
+  }
+
   return (
     <>
       <Head>
@@ -11,7 +57,69 @@ export default function AddCar() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        Add Car
+        <div className="max-w-5xl mx-auto bg-white p-4 shadow-sm rounded-md mt-24">
+          <div className="space-y-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <InputField
+                id="car_license_plate"
+                label="License Plate"
+                type="text"
+                value={car.licensePlate}
+                onChange={(e) => setCar({ ...car, licensePlate: e })}
+              />
+              <InputField
+                id="car_chassis_number"
+                label="Chassis Number"
+                type="number"
+                value={car.chassisNumber.toString()}
+                onChange={(e) => setCar({ ...car, chassisNumber: parseInt(e) })}
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <InputField
+                id="car_brand"
+                label="Brand"
+                type="text"
+                value={car.brand}
+                onChange={(e) => setCar({ ...car, brand: e })}
+              />
+              <InputField
+                id="car_type"
+                label="Type"
+                type="text"
+                value={car.carType}
+                onChange={(e) => setCar({ ...car, carType: e })}
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <InputField
+                id="car_colour"
+                label="Colour"
+                type="text"
+                value={car.colour}
+                onChange={(e) => setCar({ ...car, colour: e })}
+              />
+              <InputField
+                id="car_mileage"
+                label="Mileage"
+                type="number"
+                value={car.mileage.toString()}
+                onChange={(e) => setCar({ ...car, mileage: parseInt(e) })}
+              />
+            </div>
+            {/* TODO: Add image field */}
+            {/* <div>
+              <FileField value={file} onChange={(e) => setFile(e)} />
+            </div> */}
+            <button
+              type="button"
+              onClick={mintCar}
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600"
+            >
+              Print
+            </button>
+          </div>
+        </div>
       </main>
     </>
   )

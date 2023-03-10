@@ -4,91 +4,53 @@ pragma solidity >=0.8.0 <0.9.0;
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-contract CarDealership is ERC721, Ownable {
+contract CarDealership is Ownable, ERC721Enumerable {
   using Counters for Counters.Counter;
-
   Counters.Counter private _tokenIdCounter;
 
-  constructor() ERC721("CarToken", "CAR") {}
+  constructor() ERC721("carTokens", "CAR") {}
 
   struct Car {
-    address owner;
     string licensePlate;
-    uint256 chassisNumber;
     string brand;
-    string carType;
-    string colour;
-    uint256 mileage;
-    string imageUrl;
-    uint256 price;
-    bool forSale;
   }
 
   mapping(uint256 => Car) private cars;
-  uint256 totalCars = 0;
 
-  function safeMint(
-    address _owner,
-    string memory _licensePlate,
-    uint256 _chassisNumber,
-    string memory _brand,
-    string memory _carType,
-    string memory _colour,
-    uint256 _mileage,
-    string memory _imageUrl
-  ) public onlyOwner {
-    uint256 tokenId = _tokenIdCounter.current();
+  function mintCar(address _owner, string memory _licensePlate, string memory _brand) public returns (uint256) {
     _tokenIdCounter.increment();
-    _safeMint(_owner, tokenId);
-    cars[tokenId] = Car(
-      _owner,
-      _licensePlate,
-      _chassisNumber,
-      _brand,
-      _carType,
-      _colour,
-      _mileage,
-      _imageUrl,
-      0,
-      false
-    );
+
+    uint256 newCarId = _tokenIdCounter.current();
+    _safeMint(_owner, newCarId);
+
+    cars[newCarId] = Car(_licensePlate, _brand);
+
+    return newCarId;
   }
 
-  function sellCar(uint256 _tokenId, uint256 _price) public {
-    require(_exists(_tokenId), "CarDealership: car does not exist");
-    require(msg.sender == ownerOf(_tokenId), "CarDealership caller is not the owner of the car");
+  function getCar(uint256 _tokenId) public view returns (string memory, string memory) {
+    require(_exists(_tokenId), "Car does not exist");
 
-    cars[_tokenId].price = _price;
-    cars[_tokenId].forSale = true;
+    Car memory car = cars[_tokenId];
 
-    totalCars += 1;
+    return (car.licensePlate, car.brand);
   }
 
-  function buyCar(uint256 _tokenId) public payable {
-    require(_exists(_tokenId), "CarDealership: car does not exist");
-    require(cars[_tokenId].forSale == true, "CarDealership: car is not for sale");
-    require(msg.value == cars[_tokenId].price, "CarDealership: incorrect payment amount");
+  function getCarsByOwner(address _owner) public view returns (Car[] memory) {
+    uint256 tokenCount = balanceOf(_owner);
+    Car[] memory _cars = new Car[](tokenCount);
 
-    address _seller = ownerOf(_tokenId);
-    _transfer(_seller, msg.sender, _tokenId);
-    cars[_tokenId].forSale = false;
-    cars[_tokenId].owner = msg.sender;
-    payable(_seller).transfer(msg.value);
-  }
-
-  function getCar(uint256 _tokenId) public view returns (Car memory) {
-    require(_exists(_tokenId), "CarDealership: car does not exist");
-    return cars[_tokenId];
-  }
-
-  function getAllCars() public view returns (Car[] memory) {
-    Car[] memory _cars = new Car[](totalCars);
-
-    for (uint256 i = 0; i < totalCars; i++) {
-      _cars[i] = cars[i];
+    for (uint256 i = 0; i < tokenCount; i++) {
+      uint256 _tokenId = tokenOfOwnerByIndex(_owner, i);
+      _cars[i] = cars[_tokenId];
     }
 
     return _cars;
+  }
+
+  function testFunction() public pure returns (string memory) {
+    return "TESTING IF THIS WORKS";
   }
 }
