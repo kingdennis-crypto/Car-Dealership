@@ -13,29 +13,37 @@ contract CarDealership is Ownable, ERC721Enumerable {
   constructor() ERC721("carTokens", "CAR") {}
 
   struct Car {
+    // The license plate, chassis number, brand, type, and colour of the car
+    uint256 tokenId;
     string licensePlate;
+    string chassisNumber;
     string brand;
+    string carType;
+    string colour;
   }
 
   mapping(uint256 => Car) private cars;
 
-  function mintCar(address _owner, string memory _licensePlate, string memory _brand) public returns (uint256) {
+  function mintCar(
+    address _owner,
+    string memory _licensePlate,
+    string memory _chassisNumber,
+    string memory _brand,
+    string memory _carType,
+    string memory _colour
+  ) public returns (uint256) {
     _tokenIdCounter.increment();
 
     uint256 newCarId = _tokenIdCounter.current();
     _safeMint(_owner, newCarId);
 
-    cars[newCarId] = Car(_licensePlate, _brand);
+    cars[newCarId] = Car(newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour);
 
     return newCarId;
   }
 
-  function getCar(uint256 _tokenId) public view returns (string memory, string memory) {
-    require(_exists(_tokenId), "Car does not exist");
-
-    Car memory car = cars[_tokenId];
-
-    return (car.licensePlate, car.brand);
+  function getCarByToken(uint256 _tokenId) public view returns (Car memory) {
+    return cars[_tokenId];
   }
 
   function getCarsByOwner(address _owner) public view returns (Car[] memory) {
@@ -48,9 +56,5 @@ contract CarDealership is Ownable, ERC721Enumerable {
     }
 
     return _cars;
-  }
-
-  function testFunction() public pure returns (string memory) {
-    return "TESTING IF THIS WORKS";
   }
 }
