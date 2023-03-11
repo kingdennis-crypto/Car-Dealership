@@ -9,6 +9,11 @@ interface WalletContextInterface {
   isConnected: boolean
   address: string | null
   callContractFunction: (functionName: string, ...args: any[]) => Promise<any>
+  callContractFunctionWithEthers: (
+    functionName: string,
+    value: ethers.BigNumberish,
+    ...args: any[]
+  ) => Promise<any>
   connectToContract: () => Promise<void>
   connectWallet: () => Promise<void>
 }
@@ -17,6 +22,7 @@ const WalletContext = createContext<WalletContextInterface>({
   isConnected: false,
   address: null,
   callContractFunction: async (functionName: string, ...args: any[]) => {},
+  callContractFunctionWithEthers: async (functionName, value, ...args) => {},
   connectToContract: async () => {},
   connectWallet: async () => {},
 })
@@ -100,6 +106,26 @@ export function WalletProvider({ children }: Props) {
     }
   }
 
+  async function callContractFunctionWithEthers(
+    functionName: any,
+    value: ethers.BigNumberish,
+    ...args: any[]
+  ) {
+    try {
+      if (!contract) {
+        console.error('Contract not initialized')
+        return null
+      }
+
+      const tx = await contract.functions[functionName](...args, { value })
+      const receipt = await tx.wait()
+      return receipt
+    } catch (error) {
+      console.error(`Error calling function ${functionName}: ${error}`)
+      return null
+    }
+  }
+
   // TODO: Add authentication guard
   return (
     <WalletContext.Provider
@@ -107,6 +133,7 @@ export function WalletProvider({ children }: Props) {
         isConnected,
         address,
         callContractFunction,
+        callContractFunctionWithEthers,
         connectToContract,
         connectWallet,
       }}
