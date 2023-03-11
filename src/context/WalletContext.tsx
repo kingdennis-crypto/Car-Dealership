@@ -9,14 +9,16 @@ interface WalletContextInterface {
   isConnected: boolean
   address: string | null
   callContractFunction: (functionName: string, ...args: any[]) => Promise<any>
-  connect: () => Promise<void>
+  connectToContract: () => Promise<void>
+  connectWallet: () => Promise<void>
 }
 
 const WalletContext = createContext<WalletContextInterface>({
   isConnected: false,
   address: null,
   callContractFunction: async (functionName: string, ...args: any[]) => {},
-  connect: async () => {},
+  connectToContract: async () => {},
+  connectWallet: async () => {},
 })
 
 interface Props {
@@ -24,41 +26,49 @@ interface Props {
 }
 
 export function WalletProvider({ children }: Props) {
-  const [provider, setProvider] = useState<any>(null)
-  const [signer, setSigner] = useState<any>(null)
-  const [address, setAddress] = useState<any>(null)
-  const [contract, setContract] = useState<any>(null)
+  const [provider, setProvider] =
+    useState<ethers.providers.Web3Provider | null>(null)
+  const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | null>(
+    null
+  )
+  const [address, setAddress] = useState<string | null>(null)
+  const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [isConnected, setIsConnected] = useState<boolean>(false)
 
   useEffect(() => {
-    connect()
+    connectToContract()
     // eslint-disable-next-line
   }, [])
 
-  // TODO: Add function to not immediately login
+  async function connectToContract(): Promise<void> {
+    try {
+      if (typeof (window as any) === 'undefined') {
+        throw new Error('Please install MetaMask first.')
+      }
 
-  // async function getConnectedWallet() {
-  //   if (typeof (window as any).ethereum === 'undefined') {
-  //     throw new Error('Please install MetaMask first.');
-  //   }
+      const _provider = new ethers.providers.Web3Provider(
+        (window as any).ethereum
+      )
+      const _signer = _provider.getSigner()
+      const _contract = new ethers.Contract(contractAddress, abi.abi, _signer)
 
-  //   const provider = new ethers.providers.Web3Provider((window as any).ethereum);
-  //   const accounts = await provider.listAccounts();
+      const _address = await _provider.listAccounts()
 
-  //   if (accounts.length === 0) {
-  //     return login();
-  //   }
+      if (_address.length > 0) {
+        setAddress(_address[0])
+      }
 
-  //   return accounts[0];
-  // }
+      setProvider(_provider)
+      setSigner(_signer)
+      setContract(_contract)
 
-  // async function login() {
-  //   if (typeof (window as any).ethereum === 'undefined') {
-  //     throw new Error('Please install MetaMask first.');
-  //   }
-  // }
+      setIsConnected(true)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
-  async function connect(): Promise<void> {
+  async function connectWallet(): Promise<void> {
     try {
       if (typeof (window as any) === 'undefined') {
         throw new Error('Please install MetaMask first.')
@@ -68,20 +78,10 @@ export function WalletProvider({ children }: Props) {
         method: 'eth_requestAccounts',
       })
 
-      const _provider = new ethers.providers.Web3Provider(
-        (window as any).ethereum
-      )
-      const _signer = _provider.getSigner()
-      const _address = await _signer.getAddress()
-      const _contract = new ethers.Contract(contractAddress, abi.abi, _signer)
-
-      setProvider(_provider)
+      const _address = await signer!.getAddress()
       setAddress(_address)
-      setContract(_contract)
-
-      setIsConnected(true)
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -103,7 +103,13 @@ export function WalletProvider({ children }: Props) {
   // TODO: Add authentication guard
   return (
     <WalletContext.Provider
-      value={{ isConnected, address, callContractFunction, connect }}
+      value={{
+        isConnected,
+        address,
+        callContractFunction,
+        connectToContract,
+        connectWallet,
+      }}
     >
       {isConnected ? children : <p>Loading</p>}
     </WalletContext.Provider>
