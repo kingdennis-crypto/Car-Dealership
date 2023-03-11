@@ -12,6 +12,10 @@ contract CarDealership is Ownable, ERC721Enumerable {
 
   constructor() ERC721("carTokens", "CAR") {}
 
+  receive() external payable {}
+
+  fallback() external payable {}
+
   struct Car {
     // The license plate, chassis number, brand, type, and colour of the car
     address owner;
@@ -54,7 +58,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
     Car storage _car = cars[_tokenId];
 
     address _owner = ownerOf(_tokenId);
-    require(_owner != msg.sender, "You can't biy your own car");
+    require(_owner != msg.sender, "You can't buy your own car");
     require(!_car.sold, "Car is already sold");
     require(msg.value >= _car.price, "Insufficient funds");
 
@@ -65,19 +69,29 @@ contract CarDealership is Ownable, ERC721Enumerable {
     emit CarSold(_tokenId, msg.sender, msg.value);
   }
 
-  function retrieveCar(uint256 _tokenId) public {
+  function retrieveCar(uint256 _tokenId) public payable {
     require(_exists(_tokenId), "Car does not exist");
     Car storage _car = cars[_tokenId];
     require(_car.sold, "Car is not sold");
     require(msg.sender == _car.buyer, "Only the buyer can retrieve the car");
 
-    // TODO: Change so that the money will be grabbed of the contract
-    payable(owner()).transfer(_car.price);
-    _safeTransfer(owner(), msg.sender, _tokenId, "");
+    address _owner = ownerOf(_tokenId);
+    address _buyer = _car.buyer;
+
+    uint256 _price = _car.price * 1 ether;
+
+    // Transfer the price of the car to the original owner
+    (bool sent, ) = payable(_owner).call{value: _price}("");
+
+    require(sent, "Failed to send Ether");
+
+    // Transfer the ownership of the car to the buyer
+    _safeTransfer(_owner, _buyer, _tokenId, "");
 
     _car.sold = false;
     _car.buyer = address(0);
     _car.price = 0;
+    _car.owner = _buyer;
   }
 
   function getCarByToken(uint256 _tokenId) public view returns (Car memory) {
