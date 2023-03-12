@@ -4,11 +4,9 @@ module.exports = {
     // Or if using `src` directory:
     './src/**/*.{ts,tsx}',
     './public/**/*.html',
-    './node_modules/flowbite-react/**/*.js',
-    './node_modules/flowbite/**/*.js',
   ],
   theme: {
     extend: {},
   },
-  plugins: [require('flowbite/plugin')],
+  plugins: [],
 }
