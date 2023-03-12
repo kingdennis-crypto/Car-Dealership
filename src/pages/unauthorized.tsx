@@ -35,7 +35,7 @@ export default function Unauthorized() {
           </div>
           <p className="text-8xl">401</p>
           <p className="text-xl">
-            You don&apos;t have permission to access the resource.{' '}
+            You don&apos;t have permission to access this resource.{' '}
             {!address && (
               <>
                 Try to
