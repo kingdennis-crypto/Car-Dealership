@@ -1,10 +1,15 @@
+// React imports
 import { useEffect, useState } from 'react'
 import { useWallet } from '@/context/WalletContext'
 import { useRouter } from 'next/router'
-import Car from '@/models/car'
-import Head from 'next/head'
 import { ethers } from 'ethers'
+import { toast } from 'react-toastify'
+
+import Head from 'next/head'
 import Image from 'next/image'
+
+import Car from '@/models/car'
+
 import Modal from '@/components/layout/modal'
 import InputField from '@/components/input/InputField'
 
@@ -69,7 +74,18 @@ export default function LicensePlate() {
   }
 
   async function updateCarMileage() {
-    console.log(car?.mileage, mileage, car?.mileage < mileage)
+    const newMileageIsHigher = car?.mileage < mileage
+    console.log(car?.mileage, mileage, newMileageIsHigher)
+
+    // TODO: Swap with toastify
+    if (!newMileageIsHigher) {
+      return alert('The new mileage is not higher')
+    }
+
+    callContractFunction('changeMileage', token, mileage)
+    car!.mileage = mileage
+    // const _car: Car = await callContractFunction('changeMileage', token, mileage);
+    // setCar(_car)
   }
 
   return (
@@ -232,19 +248,6 @@ export default function LicensePlate() {
           }
         >
           <div>
-            {/* <label
-              htmlFor="visitors"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Unique visitors (per month)
-            </label>
-            <input
-              type="number"
-              id="visitors"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              placeholder=""
-              required
-            /> */}
             <InputField
               id="car_mileage"
               label="Mileage"

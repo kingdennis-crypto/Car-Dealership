@@ -58,8 +58,8 @@ export default class Car {
       item['brand'],
       item['carType'],
       item['colour'],
-      this.hexConverter(item['price']['_hex']),
       this.hexConverter(item['mileage']['_hex']),
+      this.hexConverter(item['price']['_hex']),
       item['sold'],
       item['buyer']
     )

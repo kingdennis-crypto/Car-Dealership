@@ -24,9 +24,12 @@ export default function CarCard({ car }: CarProp) {
         <p>Image</p>
       </div>
       <div className="my-2">
-        <p>
-          {car.brand} {car.carType}
-        </p>
+        <div className="flex flex-row justify-between">
+          <p>
+            {car.brand} {car.carType}
+          </p>
+          <p>{car.mileage}KM</p>
+        </div>
         <p>{car.colour}</p>
         <div className="flex flex-row items-center justify-between">
           <p>{car.price} ETH</p>
