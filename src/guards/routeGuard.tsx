@@ -1,4 +1,4 @@
-import useWallet from '@/hooks/useWallet'
+import { useWallet } from '@/context/WalletContext'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
 
@@ -14,15 +14,21 @@ type Props = {
  * @param {object} props - The props object containing the children to render.
  * @returns {ReactNode} The JSX element to render.
  */
-export default function RouteGuard({ children }: Props): ReactNode {
-  const userWallet = useWallet()
+export default function RouteGuard({ children }: Props) {
   const router = useRouter()
+  const { address, provider } = useWallet()
 
   const [authorized, setAuthorized] = useState<boolean>(false)
 
   useEffect(() => {
     // On initial load - run auth check
     authCheck(router.pathname.split('/').slice(1)[0])
+
+    const ethereuem = (window as any).ethereum
+
+    ethereuem.on('accountsChanged', (accounts: any) => {
+      authCheck(router.pathname.split('/').slice(1)[0])
+    })
 
     // On route change start - hide page content by setting authorized to false
     const hideContent = () => setAuthorized(false)
@@ -41,11 +47,11 @@ export default function RouteGuard({ children }: Props): ReactNode {
   }, [])
 
   useEffect(() => {
-    // Re-run auth chcek when the wallet account changes
+    // Re-run auth check when the wallet account changes
     authCheck(router.pathname.split('/').slice(1)[0])
 
     // eslint-disable-next-line
-  }, [userWallet.wallet])
+  }, [address, router.pathname])
 
   /**
    * Function that checks if a user is authorized to access a specific page or not.
@@ -56,13 +62,12 @@ export default function RouteGuard({ children }: Props): ReactNode {
    */
   const authCheck = async (url: string): Promise<void> => {
     // Redirect to login page if accessing a private page and not logged in
-    const wallet = await userWallet.getWallet()
-    console.log('WALLET', wallet)
     const restrictedPaths: string[] = ['profile']
 
+    // profile/my-cars
     // TODO: Add function that waits for the user login, if logged in redirect to original page
 
-    if (restrictedPaths.includes(url) && !wallet) {
+    if (restrictedPaths.includes(url) && !address) {
       setAuthorized(false)
       router.push({
         pathname: '/unauthorized',
@@ -73,5 +78,6 @@ export default function RouteGuard({ children }: Props): ReactNode {
     }
   }
 
-  return authorized ? children : <p>Loading...</p>
+  // return authorized ? children : <p>Loading</p>
+  return <>{authorized ? children : <p>Loading</p>}</>
 }

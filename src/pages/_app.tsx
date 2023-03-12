@@ -10,9 +10,11 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <WalletProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
+        <RouteGuard>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </RouteGuard>
       </WalletProvider>
     </>
   )
