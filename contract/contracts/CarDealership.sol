@@ -16,6 +16,15 @@ contract CarDealership is Ownable, ERC721Enumerable {
 
   fallback() external payable {}
 
+  string constant CAR_DOES_NOT_EXIST = "Car not found";
+  string constant CANT_BUY_OWN_CAR = "You cannot buy your own car";
+  string constant CAR_ALREADY_SOLD = "The car has already been sold";
+  string constant INSUFFICIENT_FUNDS = "Insufficient funds for buying the car";
+  string constant CAR_NOT_SOLD = "The car has not been sold yet";
+  string constant ONLY_BUYER = "Only the buyer can retrieve this car";
+  string constant FAILED_TO_SENT_ETHER = "Failed to transfer ether";
+  string constant ONLY_BUYER_CANCEL = "Only the buyer can cancel this order";
+
   struct Car {
     // The license plate, chassis number, brand, type, and colour of the car
     address owner;
@@ -59,13 +68,13 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId the ID of the car being purchased
   /// @dev Requires that the car with the given token exists, is not already sold, and that the buyer is not the owner of the car
   function buyCar(uint256 _tokenId) public payable {
-    require(_exists(_tokenId), "Car does not exist");
+    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
     Car storage _car = cars[_tokenId];
 
     address _owner = ownerOf(_tokenId);
-    require(_owner != msg.sender, "You can't buy your own car");
-    require(!_car.sold, "Car is already sold");
-    require(msg.value >= _car.price, "Insufficient funds");
+    require(_owner != msg.sender, CANT_BUY_OWN_CAR);
+    require(!_car.sold, CAR_ALREADY_SOLD);
+    require(msg.value >= _car.price, INSUFFICIENT_FUNDS);
 
     _car.sold = true;
     _car.buyer = msg.sender;
@@ -78,16 +87,16 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId the ID of the car being purchased
   function cancelCarOrder(uint256 _tokenId) public {
   // TODO: After cancelation check what happens with the money
-    require(_exists(_tokenId), "Car does not exist");
+    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
     Car storage _car = cars[_tokenId];
-    require(_car.sold, "Car is not sold");
-    require(msg.sender == _car.buyer, "Only the buyer can cancel the order");
+    require(_car.sold, CAR_NOT_SOLD);
+    require(msg.sender == _car.buyer, ONLY_BUYER_CANCEL);
 
     uint256 _price = _car.price * 1 ether;
 
     // Transfer the money back to the buyer
     (bool _sent, ) = payable(_car.buyer).call{value: _price}("");
-    require(_sent, "Failed to send Ether");
+    require(_sent, FAILED_TO_SENT_ETHER);
 
     // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
@@ -99,11 +108,11 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId The ID of the car to retrieve
   function retrieveCar(uint256 _tokenId) public payable {
     // Check if the car exists
-    require(_exists(_tokenId), "Car does not exist");
+    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
     // Retrieve the car and check the sold status and the buyer
     Car storage _car = cars[_tokenId];
-    require(_car.sold, "Car is not sold");
-    require(msg.sender == _car.buyer, "Only the buyer can retrieve the car");
+    require(_car.sold, CAR_NOT_SOLD);
+    require(msg.sender == _car.buyer, ONLY_BUYER);
 
     address _owner = ownerOf(_tokenId);
     address _buyer = _car.buyer;
@@ -113,7 +122,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
 
     // Transfer the price of the car to the original owner
     (bool sent, ) = payable(_owner).call{value: _price}("");
-    require(sent, "Failed to send Ether");
+    require(sent, FAILED_TO_SENT_ETHER);
 
     // Transfer the ownership of the car to the buyer
     _safeTransfer(_owner, _buyer, _tokenId, "");
@@ -130,7 +139,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId The ID of the car to retrieve
   /// @return Car The Car associated with the token
   function getCarByToken(uint256 _tokenId) public view returns (Car memory) {
-    require(_exists(_tokenId), "Car does not exist");
+    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
 
     return cars[_tokenId];
   }
@@ -173,7 +182,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _mileage The new mileage of the car
   /// @return The updated Car object
   function changeMileage(uint256 _tokenId, uint256 _mileage) public returns (Car memory) {
-    require(_exists(_tokenId), "Car does not exist");
+    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
     Car storage _car = cars[_tokenId];
     _car.mileage = _mileage;
     return _car;
