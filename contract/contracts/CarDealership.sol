@@ -25,6 +25,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
     string brand;
     string carType;
     string colour;
+    uint256 mileage;
     bool sold;
     address buyer;
     uint256 price;
@@ -41,6 +42,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
     string memory _brand,
     string memory _carType,
     string memory _colour,
+    uint256 _mileage,
     uint256 _price
   ) public returns (uint256) {
     _tokenIdCounter.increment();
@@ -48,7 +50,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
     uint256 newCarId = _tokenIdCounter.current();
     _safeMint(_owner, newCarId);
 
-    cars[newCarId] = Car(_owner, newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour, false, address(0), _price);
+    cars[newCarId] = Car(_owner, newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour, _mileage, false, address(0), _price);
 
     return newCarId;
   }
@@ -69,6 +71,25 @@ contract CarDealership is Ownable, ERC721Enumerable {
     emit CarSold(_tokenId, msg.sender, msg.value);
   }
 
+  // TODO: After cancelation check what happens with the money
+  function cancelCarOrder(uint256 _tokenId) public {
+    require(_exists(_tokenId), "Car does not exist");
+    Car storage _car = cars[_tokenId];
+    require(_car.sold, "Car is not sold");
+    require(msg.sender == _car.buyer, "Only the buyer can cancel the order");
+
+    uint256 _price = _car.price * 1 ether;
+
+    // Transfer the money back to the buyer
+    (bool _sent, ) = payable(_car.buyer).call{value: _price}("");
+    require(_sent, "Failed to send Ether");
+
+    _car.sold = false;
+    _car.buyer = address(0);
+    _car.price = 0;
+  }
+
+  // TODO: Create a decline function where the money will be transfered back to the original buyer
   function retrieveCar(uint256 _tokenId) public payable {
     require(_exists(_tokenId), "Car does not exist");
     Car storage _car = cars[_tokenId];
@@ -121,5 +142,12 @@ contract CarDealership is Ownable, ERC721Enumerable {
     }
 
     return _cars;
+  }
+
+  function changeMileage(uint256 _tokenId, uint256 _mileage) public returns (Car memory) {
+    require(_exists(_tokenId), "Car does not exist");
+    Car storage _car = cars[_tokenId];
+    _car.mileage = _mileage;
+    return _car;
   }
 }
