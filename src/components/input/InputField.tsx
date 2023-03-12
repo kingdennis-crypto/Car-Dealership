@@ -2,7 +2,7 @@ type Props = {
   id: string
   label: string
   type: string
-  value: string
+  value: string | number
   onChange: (value: string) => void
   placeholder?: string
   required?: boolean

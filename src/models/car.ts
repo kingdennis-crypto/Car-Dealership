@@ -13,7 +13,10 @@ export default class Car {
   brand: string
   carType: string
   colour: string
+  mileage: any
   price: any
+  sold: boolean
+  buyer: string
 
   constructor(
     _owner: string,
@@ -23,7 +26,10 @@ export default class Car {
     _brand: string,
     _carType: string,
     _colour: string,
-    _price: number
+    _mileage: number,
+    _price: number,
+    _sold: boolean,
+    _buyer: string
   ) {
     this.owner = _owner
     this.tokenId = _tokenId
@@ -32,31 +38,40 @@ export default class Car {
     this.brand = _brand
     this.carType = _carType
     this.colour = _colour
+    this.mileage = _mileage
     this.price = _price
+    this.sold = _sold
+    this.buyer = _buyer
   }
 
+  /**
+   * Create a new Car object from an array of properties
+   * @param {Array} item - An array of properties representing a car
+   * @returns {Car} A new Car object with the given properties
+   */
   static fromArray(item: Car): Car {
-    console.log(item)
-
-    const _tokenHex = item['tokenId']['_hex'].toString(16)
-    const _priceHex = item['price']['_hex'].toString(16)
-
-    const _tokenNumber = parseInt(_tokenHex, 16)
-    const _priceNumber = parseInt(_priceHex, 16)
-
     return new Car(
       item['owner'],
-      _tokenNumber,
+      this.hexConverter(item['tokenId']['_hex']),
       item['licensePlate'],
       item['chassisNumber'],
       item['brand'],
       item['carType'],
       item['colour'],
-      _priceNumber
+      this.hexConverter(item['price']['_hex']),
+      this.hexConverter(item['mileage']['_hex']),
+      item['sold'],
+      item['buyer']
     )
   }
 
-  // static fromJson(item: Car): Car {
-  //   return new Car()
-  // }
+  /**
+   * Converts a hexadecimal string to a decimal number.
+   *
+   * @param hex - A hexadecimal string.
+   * @returns A decimal number.
+   */
+  static hexConverter(hex: string) {
+    return parseInt(hex, 16)
+  }
 }
