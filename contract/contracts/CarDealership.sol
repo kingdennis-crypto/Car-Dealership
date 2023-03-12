@@ -55,6 +55,9 @@ contract CarDealership is Ownable, ERC721Enumerable {
     return newCarId;
   }
 
+  /// @notice Allows a user to buy a car with a given token ID.
+  /// @param _tokenId the ID of the car being purchased
+  /// @dev Requires that the car with the given token exists, is not already sold, and that the buyer is not the owner of the car
   function buyCar(uint256 _tokenId) public payable {
     require(_exists(_tokenId), "Car does not exist");
     Car storage _car = cars[_tokenId];
@@ -71,8 +74,10 @@ contract CarDealership is Ownable, ERC721Enumerable {
     emit CarSold(_tokenId, msg.sender, msg.value);
   }
 
-  // TODO: After cancelation check what happens with the money
+  /// @notice Allows the buyer to cancel an order and get the money back
+  /// @param _tokenId the ID of the car being purchased
   function cancelCarOrder(uint256 _tokenId) public {
+  // TODO: After cancelation check what happens with the money
     require(_exists(_tokenId), "Car does not exist");
     Car storage _car = cars[_tokenId];
     require(_car.sold, "Car is not sold");
@@ -84,14 +89,18 @@ contract CarDealership is Ownable, ERC721Enumerable {
     (bool _sent, ) = payable(_car.buyer).call{value: _price}("");
     require(_sent, "Failed to send Ether");
 
+    // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
     _car.buyer = address(0);
     _car.price = 0;
   }
 
-  // TODO: Create a decline function where the money will be transfered back to the original buyer
+  /// @notice Allows the buyer to retrieve the purchased car.
+  /// @param _tokenId The ID of the car to retrieve
   function retrieveCar(uint256 _tokenId) public payable {
+    // Check if the car exists
     require(_exists(_tokenId), "Car does not exist");
+    // Retrieve the car and check the sold status and the buyer
     Car storage _car = cars[_tokenId];
     require(_car.sold, "Car is not sold");
     require(msg.sender == _car.buyer, "Only the buyer can retrieve the car");
@@ -99,33 +108,45 @@ contract CarDealership is Ownable, ERC721Enumerable {
     address _owner = ownerOf(_tokenId);
     address _buyer = _car.buyer;
 
+    // Get the price of the car in WEI
     uint256 _price = _car.price * 1 ether;
 
     // Transfer the price of the car to the original owner
     (bool sent, ) = payable(_owner).call{value: _price}("");
-
     require(sent, "Failed to send Ether");
 
     // Transfer the ownership of the car to the buyer
     _safeTransfer(_owner, _buyer, _tokenId, "");
 
+    // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
     _car.buyer = address(0);
     _car.price = 0;
     _car.owner = _buyer;
   }
 
+  /// @notice Get the car data associated with the given token ID
+  /// @dev This function is view-only and does not modify the blockchain state
+  /// @param _tokenId The ID of the car to retrieve
+  /// @return Car The Car associated with the token
   function getCarByToken(uint256 _tokenId) public view returns (Car memory) {
     require(_exists(_tokenId), "Car does not exist");
 
     return cars[_tokenId];
   }
 
+  /// @notice Return an array of all the cars owned by a given address
+  /// @param _owner The address of the owner
+  /// @return Car[] A array containing all the cars owned by the given address
   function getCarsByOwner(address _owner) public view returns (Car[] memory) {
+    // Get the number of tokens owned by the address
     uint256 tokenCount = balanceOf(_owner);
+
+    // Create a new array to hold the cars with the amount of token
     Car[] memory _cars = new Car[](tokenCount);
 
     for (uint256 i = 0; i < tokenCount; i++) {
+      // Get the tokenID by the owner and index
       uint256 _tokenId = tokenOfOwnerByIndex(_owner, i);
       _cars[i] = cars[_tokenId];
     }
@@ -133,17 +154,24 @@ contract CarDealership is Ownable, ERC721Enumerable {
     return _cars;
   }
 
+  /// @notice Returns an array of all the cars in the contract
+  /// @return Car[] An array of all the cars in the contract
   function getAllCars() public view returns (Car[] memory) {
     uint256 _tokenCount = totalSupply();
     Car[] memory _cars = new Car[](_tokenCount);
 
     for (uint256 i = 0; i < _tokenCount; i++) {
+      // Get the car at the current index and add it to the array
       _cars[i] = cars[tokenByIndex(i)];
     }
 
     return _cars;
   }
 
+  /// @notice Allows the owner of a car to change its mileage
+  /// @param _tokenId The ID of the car to retrieve
+  /// @param _mileage The new mileage of the car
+  /// @return The updated Car object
   function changeMileage(uint256 _tokenId, uint256 _mileage) public returns (Car memory) {
     require(_exists(_tokenId), "Car does not exist");
     Car storage _car = cars[_tokenId];
