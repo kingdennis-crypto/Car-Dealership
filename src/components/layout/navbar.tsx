@@ -1,14 +1,23 @@
 import { useWallet } from '@/context/WalletContext'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+
+const selectedStyling =
+  'block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0'
+const unselectedStyling =
+  'block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0'
 
 // TODO: Fix flowbite and responsive
 export default function Navbar() {
-  const { address, isConnected } = useWallet()
+  const router = useRouter()
+  const { address, isConnected, connectWallet } = useWallet()
+
+  const [path, setPath] = useState<string>(router.pathname)
 
   useEffect(() => {
-    console.log(address, isConnected)
-  }, [address, isConnected])
+    setPath(router.pathname)
+  }, [router.pathname])
 
   return (
     <nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
@@ -39,14 +48,14 @@ export default function Navbar() {
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              fill-rule="evenodd"
+              fillRule="evenodd"
               d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clip-rule="evenodd"
+              clipRule="evenodd"
             ></path>
           </svg>
         </button>
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
-          <ul className="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white">
+          <ul className="flex flex-col items-center p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white">
             <li>
               <p>{isConnected}</p>
             </li>
@@ -54,7 +63,7 @@ export default function Navbar() {
               <Link
                 href="/"
                 aria-current="page"
-                className="block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0"
+                className={path === '/' ? selectedStyling : unselectedStyling}
               >
                 Home
               </Link>
@@ -62,7 +71,9 @@ export default function Navbar() {
             <li>
               <Link
                 href="/cars"
-                className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0"
+                className={
+                  path === '/cars' ? selectedStyling : unselectedStyling
+                }
               >
                 All Cars
               </Link>
@@ -73,7 +84,11 @@ export default function Navbar() {
                 <li>
                   <Link
                     href="/profile/my-cars"
-                    className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0"
+                    className={
+                      path === '/profile/my-cars'
+                        ? selectedStyling
+                        : unselectedStyling
+                    }
                   >
                     My Cars
                   </Link>
@@ -81,14 +96,23 @@ export default function Navbar() {
                 <li>
                   <Link
                     href="/profile/add-car"
-                    className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0"
+                    className={
+                      path === '/profile/add-car'
+                        ? selectedStyling
+                        : unselectedStyling
+                    }
                   >
                     Add car
                   </Link>
                 </li>
               </>
             ) : (
-              <p>Login</p>
+              <button
+                className="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0"
+                onClick={connectWallet}
+              >
+                Login
+              </button>
             )}
           </ul>
         </div>
