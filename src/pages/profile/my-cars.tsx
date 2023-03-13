@@ -2,7 +2,6 @@
 import CarCard from '@/components/cards/CarCard'
 import { useWallet } from '@/context/WalletContext'
 
-import useEthers from '@/hooks/useEthers'
 import Car from '@/models/car'
 
 import { useEffect, useState } from 'react'
@@ -29,12 +28,11 @@ export default function MyCars() {
 
   return (
     <div>
-      <p>My Cars</p>
-      {/* <button onClick={getCars}>Load cars</button> */}
-      {cars.map((item, index) => {
-        // return <p key={index}>{item.tokenId}</p>
-        return <CarCard car={item} key={index} />
-      })}
+      <div className="grid grid-cols-4 gap-6">
+        {cars.map((item, index) => (
+          <CarCard key={index} car={item} />
+        ))}
+      </div>
     </div>
   )
 }

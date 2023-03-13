@@ -38,6 +38,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
     bool sold;
     address buyer;
     uint256 price;
+    string metadataUri;
   }
 
   mapping(uint256 => Car) private cars;
@@ -52,14 +53,15 @@ contract CarDealership is Ownable, ERC721Enumerable {
     string memory _carType,
     string memory _colour,
     uint256 _mileage,
-    uint256 _price
+    uint256 _price,
+    string memory _metadataUri
   ) public returns (uint256) {
     _tokenIdCounter.increment();
 
     uint256 newCarId = _tokenIdCounter.current();
     _safeMint(_owner, newCarId);
 
-    cars[newCarId] = Car(_owner, newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour, _mileage, false, address(0), _price);
+    cars[newCarId] = Car(_owner, newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour, _mileage, false, address(0), _price, _metadataUri);
 
     return newCarId;
   }

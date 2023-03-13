@@ -17,6 +17,7 @@ export default class Car {
   price: any
   sold: boolean
   buyer: string
+  metadataUri: string
 
   constructor(
     _owner: string,
@@ -29,7 +30,8 @@ export default class Car {
     _mileage: number,
     _price: number,
     _sold: boolean,
-    _buyer: string
+    _buyer: string,
+    _metadataUri: string
   ) {
     this.owner = _owner
     this.tokenId = _tokenId
@@ -42,6 +44,7 @@ export default class Car {
     this.price = _price
     this.sold = _sold
     this.buyer = _buyer
+    this.metadataUri = _metadataUri
   }
 
   /**
@@ -50,6 +53,7 @@ export default class Car {
    * @returns {Car} A new Car object with the given properties
    */
   static fromArray(item: Car): Car {
+    console.log(item)
     return new Car(
       item['owner'],
       this.hexConverter(item['tokenId']['_hex']),
@@ -61,7 +65,8 @@ export default class Car {
       this.hexConverter(item['mileage']['_hex']),
       this.hexConverter(item['price']['_hex']),
       item['sold'],
-      item['buyer']
+      item['buyer'],
+      item['metadataUri']
     )
   }
 
