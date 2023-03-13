@@ -9,7 +9,7 @@ export default function CarImage({ url, clickHandler }: Props) {
   return (
     <button
       onClick={() => clickHandler(url)}
-      className="w-full aspect-square relative rounded-md overflow-hidden hover:scale-95 cursor-pointer"
+      className="w-full border-4 aspect-square relative rounded-md overflow-hidden hover:scale-95 cursor-pointer"
     >
       <Image
         src={url}

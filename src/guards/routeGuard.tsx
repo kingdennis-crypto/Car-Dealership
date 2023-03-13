@@ -14,7 +14,7 @@ type Props = {
  * @param {object} props - The props object containing the children to render.
  * @returns {ReactNode} The JSX element to render.
  */
-export default function RouteGuard({ children }: Props) {
+export default function RouteGuard({ children }: Props): ReactNode {
   const router = useRouter()
   const { address } = useWallet()
 
@@ -64,6 +64,8 @@ export default function RouteGuard({ children }: Props) {
     // Redirect to login page if accessing a private page and not logged in
     const restrictedPaths: string[] = ['profile', 'cars']
 
+    // FIXME: If the guard throws out from cars/1 it will query parameter as cars/[token]. Try to fix this by getting the [token] from the URL
+    console.log(router)
     if (restrictedPaths.includes(url) && !address) {
       setAuthorized(false)
       router.push({

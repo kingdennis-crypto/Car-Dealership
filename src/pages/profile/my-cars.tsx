@@ -1,4 +1,4 @@
-// import useWallet from '@/hooks/useWallet'
+import Head from 'next/head'
 import CarCard from '@/components/cards/CarCard'
 import { useWallet } from '@/context/WalletContext'
 
@@ -13,26 +13,28 @@ export default function MyCars() {
 
   useEffect(() => {
     getData()
+
     // eslint-disable-next-line
   }, [])
 
   async function getData() {
     const _cars: Car[] = await callContractFunction('getCarsByOwner', address)
-    // const _loopedCars = _cars.forEach((element: Car) => element.licensePlate)
-
     const _loopedCars = _cars.map((element: Car) => Car.fromArray(element))
-
-    console.log(_loopedCars)
     setCars(_loopedCars)
   }
 
   return (
-    <div>
-      <div className="grid grid-cols-4 gap-6">
-        {cars.map((item, index) => (
-          <CarCard key={index} car={item} />
-        ))}
+    <>
+      <Head>
+        <title>All Cars</title>
+      </Head>
+      <div>
+        <div className="grid grid-cols-4 gap-6">
+          {cars.map((item, index) => (
+            <CarCard key={index} car={item} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
