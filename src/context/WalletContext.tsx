@@ -91,8 +91,8 @@ export function WalletProvider({ children }: Props) {
 
       const ethereuem = (window as any).ethereum
 
-      ethereuem.on('accountsChanged', (accounts: any) => {
-        setAddress(_address.length > 0 ? _address[0] : null)
+      ethereuem.on('accountsChanged', (_accounts: any) => {
+        setAddress(_accounts.length > 0 ? _accounts[0] : null)
       })
 
       setIsConnected(true)

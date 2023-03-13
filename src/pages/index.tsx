@@ -1,8 +1,18 @@
 import { useWallet } from '@/context/WalletContext'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 
 export default function Home() {
-  const { connectWallet } = useWallet()
+  const router = useRouter()
+  const { connectWallet, address } = useWallet()
+
+  async function getStarted() {
+    if (!address) {
+      await connectWallet()
+    }
+
+    router.push('/cars')
+  }
 
   return (
     <>
@@ -25,7 +35,7 @@ export default function Home() {
               </p>
               <button
                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                onClick={connectWallet}
+                onClick={getStarted}
               >
                 Get started
               </button>
