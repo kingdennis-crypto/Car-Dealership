@@ -15,6 +15,10 @@ import Modal from '@/components/layout/modal'
 import InputField from '@/components/input/InputField'
 import CarImage from '@/components/input/CarImage'
 
+// TODO: Work on the mileage editor, by making sure the new cannot be lower than the old and that the mileage will be saved so that it can be called later
+// TODO: Only the owner can indicate if the car is for sale and indicate an asking price, he can adjust both later
+
+// TODO: Maintenance records and service history
 export default function LicensePlate() {
   const storage = new ThirdwebStorage()
   const router = useRouter()
@@ -222,7 +226,7 @@ export default function LicensePlate() {
                   ) : (
                     <button
                       type="button"
-                      className="text-white bg-blue-400 dark:bg-blue-500 cursor-not-allowed font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                      className="text-white bg-blue-400 cursor-not-allowed font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                       disabled
                     >
                       Sold
@@ -285,48 +289,6 @@ export default function LicensePlate() {
           </div>
         </Modal>
       </div>
-
-      {/* <div>
-        <p>CAR DETAILS</p>
-        <p>{car?.licensePlate}</p>
-        <p>{car?.chassisNumber}</p>
-        <p>{car?.brand}</p>
-        <p>{car?.carType}</p>
-        <p>{car?.colour}</p>
-        <p>{car?.price}</p>
-        {car?.owner !== address && (
-          <div>
-            {car?.sold ? (
-              <>
-                {car.buyer === address ? (
-                  <button
-                    onClick={retrieveCar}
-                    className="text-white bg-blue-500 hover:bg-blue-600 rounded-md py-2 px-4"
-                  >
-                    Retrieve
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="text-white bg-blue-400 dark:bg-blue-500 cursor-not-allowed font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                    disabled
-                  >
-                    Sold
-                  </button>
-                )}
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={buyCar}
-                className="text-white bg-blue-500 hover:bg-blue-600 rounded-md py-2 px-4"
-              >
-                Buy
-              </button>
-            )}
-          </div>
-        )}
-      </div> */}
     </>
   )
 }

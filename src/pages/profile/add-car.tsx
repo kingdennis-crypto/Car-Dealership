@@ -31,18 +31,27 @@ export default function AddCar() {
   const [car, setCar] = useState<Car>(defaultCar)
   const [file, setFile] = useState<File[]>([])
   const [creating, setCreating] = useState<boolean>(false)
+  const [loadingMessage, setLoadingMessage] = useState<string>('Creating...')
 
   // TODO: Add selected image for main car image
 
+  async function imageText() {
+    const _images = Array.from(file)
+    return _images.length > 1 ? 'images' : 'image'
+  }
+
   async function mintCar() {
     setCreating(true)
+    setLoadingMessage(`Uploading ${imageText}...`)
     const metadata = {
       images: file,
     }
 
+    // console.log(defaultCar === car)
     const uri = await storage.upload(metadata)
-    console.log(uri)
 
+    // TODO: Do a check for if the car is not the same as the defaultCar
+    setLoadingMessage('Creating car...')
     const _car = await callContractFunction(
       'mintCar',
       address,
@@ -56,17 +65,12 @@ export default function AddCar() {
       uri
     )
 
-    console.log('CAR', _car)
+    setLoadingMessage('Asking for the receipt...')
     const receipt = await _car.wait()
     console.log(receipt)
 
     setCreating(false)
   }
-
-  useEffect(() => {
-    console.log('FILES', file)
-    // console.log('PREVIEW', URL.createObjectURL(file!))
-  }, [file])
 
   return (
     <>
@@ -74,9 +78,9 @@ export default function AddCar() {
         <title>Add Car</title>
       </Head>
       <main>
-        <div className="max-w-5xl mx-auto bg-white p-4 shadow-sm rounded-md mt-24">
+        <div className="max-w-5xl mx-auto bg-white p-4 shadow-sm rounded-md">
           <div className="space-y-2">
-            <p className="text-4xl">Add car</p>
+            <p className="text-4xl font-semibold">Add car</p>
             <hr />
             <div className="grid gap-4 md:grid-cols-2">
               <InputField
@@ -168,7 +172,7 @@ export default function AddCar() {
             <button
               type="button"
               onClick={mintCar}
-              className={`text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 ${
+              className={`text-white focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 ${
                 creating
                   ? 'cursor-not-allowed bg-blue-400'
                   : 'bg-blue-700 hover:bg-blue-800'
@@ -194,7 +198,7 @@ export default function AddCar() {
                       fill="currentColor"
                     />
                   </svg>
-                  Loading...
+                  {loadingMessage}
                 </>
               ) : (
                 <>Add car</>
