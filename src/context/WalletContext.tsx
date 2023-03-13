@@ -85,15 +85,15 @@ export function WalletProvider({ children }: Props) {
         setAddress(_address[0])
       }
 
+      setProvider(_provider)
+      setSigner(_signer)
+      setContract(_contract)
+
       const ethereuem = (window as any).ethereum
 
       ethereuem.on('accountsChanged', (accounts: any) => {
         setAddress(_address.length > 0 ? _address[0] : null)
       })
-
-      setProvider(_provider)
-      setSigner(_signer)
-      setContract(_contract)
 
       setIsConnected(true)
     } catch (err) {
@@ -120,6 +120,7 @@ export function WalletProvider({ children }: Props) {
     }
   }
 
+  // TODO: Add a functionality to call a view function without being signed in
   async function callContractFunction(functionName: any, ...args: any[]) {
     try {
       if (!contract) {

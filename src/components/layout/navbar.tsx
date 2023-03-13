@@ -55,9 +55,6 @@ export default function Navbar() {
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul className="flex flex-col items-center p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white">
             <li>
-              <p>{isConnected}</p>
-            </li>
-            <li>
               <Link
                 href="/"
                 aria-current="page"
@@ -66,19 +63,18 @@ export default function Navbar() {
                 Home
               </Link>
             </li>
-            <li>
-              <Link
-                href="/cars"
-                className={
-                  path === '/cars' ? selectedStyling : unselectedStyling
-                }
-              >
-                All Cars
-              </Link>
-            </li>
-            {/* TODO: Add profile dropdown */}
             {address ? (
               <>
+                <li>
+                  <Link
+                    href="/cars"
+                    className={
+                      path === '/cars' ? selectedStyling : unselectedStyling
+                    }
+                  >
+                    All Cars
+                  </Link>
+                </li>
                 <li>
                   <Link
                     href="/profile/my-cars"

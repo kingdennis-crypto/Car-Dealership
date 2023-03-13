@@ -21,6 +21,8 @@ export default function CarCard({ car }: CarProp) {
 
   useEffect(() => {
     downloadImage()
+
+    // eslint-disable-next-line
   }, [])
 
   async function downloadImage() {

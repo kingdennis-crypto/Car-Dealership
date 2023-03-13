@@ -16,7 +16,7 @@ type Props = {
  */
 export default function RouteGuard({ children }: Props) {
   const router = useRouter()
-  const { address, provider } = useWallet()
+  const { address } = useWallet()
 
   const [authorized, setAuthorized] = useState<boolean>(false)
 
@@ -62,10 +62,7 @@ export default function RouteGuard({ children }: Props) {
    */
   const authCheck = async (url: string): Promise<void> => {
     // Redirect to login page if accessing a private page and not logged in
-    const restrictedPaths: string[] = ['profile']
-
-    // profile/my-cars
-    // TODO: Add function that waits for the user login, if logged in redirect to original page
+    const restrictedPaths: string[] = ['profile', 'cars']
 
     if (restrictedPaths.includes(url) && !address) {
       setAuthorized(false)
