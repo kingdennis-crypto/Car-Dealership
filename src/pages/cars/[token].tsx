@@ -4,6 +4,7 @@ import { useWallet } from '@/context/WalletContext'
 import { useRouter } from 'next/router'
 import { ethers } from 'ethers'
 import { toast } from 'react-toastify'
+import { ThirdwebStorage } from '@thirdweb-dev/storage'
 
 import Head from 'next/head'
 import Image from 'next/image'
@@ -12,8 +13,10 @@ import Car from '@/models/car'
 
 import Modal from '@/components/layout/modal'
 import InputField from '@/components/input/InputField'
+import CarImage from '@/components/input/CarImage'
 
 export default function LicensePlate() {
+  const storage = new ThirdwebStorage()
   const router = useRouter()
 
   const { token } = router.query
@@ -23,14 +26,19 @@ export default function LicensePlate() {
   const [car, setCar] = useState<Car>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [mileage, setMileage] = useState<number>(0)
+  const [images, setImages] = useState<string[]>([])
+  const [selectedImage, setSelectedImage] = useState<string>('')
 
   async function getCarDetails() {
     const _car: Car = Car.fromArray(
       await callContractFunction('getCarByToken', token)
     )
 
-    // console.log(_car.owner === address)
-    console.log(_car)
+    const _data = await storage.downloadJSON(_car.metadataUri)
+    const _images: string[] = Object.values(_data.images)
+    setImages(_images)
+    setSelectedImage(_images[0])
+
     setCar(_car)
     setMileage(_car.mileage)
   }
@@ -94,17 +102,30 @@ export default function LicensePlate() {
         <title>{`Car | ${car?.licensePlate}`}</title>
       </Head>
       <div className="flex flex-col md:flex-row space-x-4">
-        <div className="w-1/6 bg-red-200 rounded-md p-4">
-          <p>Images</p>
+        <div className="w-1/6 max-h-screen bg-white rounded-md p-4 overflow-y-scroll">
+          {/* TODO: Make height max of the height of the default sidebar height */}
+          <div className="overflow-y-scroll">
+            <div className="flex flex-col gap-2">
+              {images.map((item, index) => (
+                <CarImage
+                  url={item}
+                  key={index}
+                  clickHandler={(e) => {
+                    setSelectedImage(e)
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
         <div className="w-3/6 relative aspect-square">
           <Image
             className="rounded-md"
-            src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format"
+            src={selectedImage}
             alt="Car main image"
             sizes="100%"
             fill
-            style={{ objectFit: 'fill' }}
+            style={{ objectFit: 'cover' }}
           />
         </div>
         <div className="w-2/6 p-4 bg-white rounded-md">

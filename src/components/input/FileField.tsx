@@ -3,13 +3,7 @@ type Props = {
   onChange: (value: any) => void
 }
 
-export default function FileField(props: Props) {
-  const { value, onChange } = props
-
-  function printContent(e: any) {
-    console.log(e.target.files[0])
-  }
-
+export default function FileField({ onChange }: Props) {
   return (
     <div className="flex items-center justify-center w-full">
       <div className="w-full">
@@ -52,15 +46,15 @@ export default function FileField(props: Props) {
             type="file"
             className="hidden"
             accept="image/png, image/jpeg"
-            value={value}
-            onChange={(e) => console.log(e.target.files)}
-            // onChange={(e) => {
-            //   const files = e.target.files
+            onChange={(e) => {
+              const files = e.target.files!
+              onChange(e.target.files)
 
-            //   if (files && files.length > 0) {
-            //     onChange(files[0])
-            //   }
-            // }}
+              // if (files.length > 0) {
+              //   onChange(files[0])
+              // }
+            }}
+            multiple
           />
         </label>
       </div>
