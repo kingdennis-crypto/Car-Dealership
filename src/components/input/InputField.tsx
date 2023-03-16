@@ -1,22 +1,24 @@
 type Props = {
   id: string
   label: string
-  type: string
+  type?: string
   value: string | number
   onChange: (value: string) => void
   placeholder?: string
   required?: boolean
+  selectItems?: string[]
 }
 
 export default function InputField(props: Props) {
   const {
     id,
     label,
-    type,
+    type = 'text',
     value,
     onChange,
     placeholder = '',
     required = false,
+    selectItems = [],
   } = props
 
   return (
@@ -27,15 +29,30 @@ export default function InputField(props: Props) {
       >
         {label}
       </label>
-      <input
-        type={type}
-        id={id}
-        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-      />
+      {type === 'select' ? (
+        <select
+          id={id}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+        >
+          <option defaultValue="">Select {label}</option>
+          {selectItems.map((item, index) => (
+            <option key={index} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          id={id}
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required={required}
+        />
+      )}
     </div>
   )
 }

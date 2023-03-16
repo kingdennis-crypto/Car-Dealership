@@ -20,6 +20,61 @@ export default class Car {
   metadataUri: string
   forSale: boolean
 
+  static BRAND: string[] = [
+    'Volkswagen',
+    'BMW',
+    'Opel',
+    'Mercedes-Benz',
+    'Audi',
+    'Renault',
+    'Peugeot',
+    'Ford',
+    'Volvo',
+    'Fiat',
+    'Citroën',
+    'Seat',
+    'Toyota',
+  ]
+
+  static TYPE: string[] = [
+    'Cabriolet',
+    'Coupé',
+    'Hatchback',
+    'MPV',
+    'Sedan',
+    'Stationwagon',
+    'SUV of ATV',
+    'Overig',
+  ]
+
+  static COLOUR: string[] = [
+    'Blue',
+    'Red',
+    'Silver or Grey',
+    'Black',
+    'Beige',
+    'Brown',
+    'Green',
+    'White',
+    'Other colours',
+  ]
+
+  static DEFAULT = new Car(
+    '',
+    0,
+    '00-AAA-0',
+    '123456789',
+    Car.BRAND[0],
+    Car.TYPE[0],
+    Car.COLOUR[0],
+    0,
+    0,
+    false,
+    '',
+    '',
+    false
+  )
+
   constructor(
     _owner: string,
     _tokenId: number,

@@ -4,45 +4,27 @@ import InputField from '@/components/input/InputField'
 import { useWallet } from '@/context/WalletContext'
 import Car from '@/models/car'
 import Head from 'next/head'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 import { ThirdwebStorage } from '@thirdweb-dev/storage'
-
-const defaultCar = new Car(
-  '',
-  1,
-  '28-TGJ-1',
-  '123',
-  'Ford',
-  'SUV',
-  'red',
-  0,
-  0,
-  false,
-  '0',
-  ''
-)
 
 export default function AddCar() {
   const storage = new ThirdwebStorage()
   const { address, callContractFunction } = useWallet()
 
-  const [car, setCar] = useState<Car>(defaultCar)
+  const [car, setCar] = useState<Car>(Car.DEFAULT)
   const [file, setFile] = useState<File[]>([])
   const [creating, setCreating] = useState<boolean>(false)
   const [loadingMessage, setLoadingMessage] = useState<string>('Creating...')
 
-  // TODO: Add selected image for main car image
-
-  async function imageText() {
+  function imageText() {
     const _images = Array.from(file)
     return _images.length > 1 ? 'images' : 'image'
   }
 
   async function mintCar() {
     setCreating(true)
-    setLoadingMessage(`Uploading ${imageText}...`)
+    setLoadingMessage(`Uploading ${imageText()}...`)
     const metadata = {
       images: file,
     }
@@ -102,25 +84,28 @@ export default function AddCar() {
               <InputField
                 id="car_brand"
                 label="Brand"
-                type="text"
+                type="select"
                 value={car.brand}
                 onChange={(e) => setCar({ ...car, brand: e })}
+                selectItems={Car.BRAND}
               />
               <InputField
                 id="car_type"
                 label="Type"
-                type="text"
+                type="select"
                 value={car.carType}
                 onChange={(e) => setCar({ ...car, carType: e })}
+                selectItems={Car.TYPE}
               />
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               <InputField
                 id="car_colour"
                 label="Colour"
-                type="text"
+                type="select"
                 value={car.colour}
                 onChange={(e) => setCar({ ...car, colour: e })}
+                selectItems={Car.COLOUR}
               />
               <InputField
                 id="car_mileage"
