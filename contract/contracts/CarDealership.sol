@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
-import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
-import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+
+import "./CarDealershipStrings.sol";
 
 contract CarDealership is Ownable, ERC721Enumerable {
   using Counters for Counters.Counter;
@@ -16,32 +18,34 @@ contract CarDealership is Ownable, ERC721Enumerable {
 
   fallback() external payable {}
 
-  string constant CAR_DOES_NOT_EXIST = "Car not found";
-  string constant CANT_BUY_OWN_CAR = "You cannot buy your own car";
-  string constant CAR_ALREADY_SOLD = "The car has already been sold";
-  string constant INSUFFICIENT_FUNDS = "Insufficient funds for buying the car";
-  string constant CAR_NOT_SOLD = "The car has not been sold yet";
-  string constant ONLY_BUYER = "Only the buyer can retrieve this car";
-  string constant FAILED_TO_SENT_ETHER = "Failed to transfer ether";
-  string constant ONLY_BUYER_CANCEL = "Only the buyer can cancel this order";
+  enum Transmission{ AUTOMATIC, HAND_SHIFTED } // Maybe IPFS
+  enum GasType{ PETROL, OIL } // Maybe IPFS
 
   struct Car {
     // The license plate, chassis number, brand, type, and colour of the car
     address owner;
     uint256 tokenId;
-    string licensePlate;
-    string chassisNumber;
-    string brand;
-    string carType;
+    string licensePlate; // Maybe IPFS
+    string chassisNumber; // Maybe IPFS
+    string brand; // Maybe IPFS
+    string carType; // Maybe IPFS
     string colour;
     uint256 mileage;
     bool sold;
     address buyer;
     uint256 price;
     string metadataUri;
+    bool forSale;
+  }
+
+  struct Mileage {
+    uint256 token;
+    uint256 mileage;
+    uint256 date;
   }
 
   mapping(uint256 => Car) private cars;
+  mapping(uint256 => Mileage[]) private mileageHistory;
 
   event CarSold(uint256 indexed tokenId, address indexed buyer, uint256 price);
 
@@ -61,7 +65,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
     uint256 newCarId = _tokenIdCounter.current();
     _safeMint(_owner, newCarId);
 
-    cars[newCarId] = Car(_owner, newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour, _mileage, false, address(0), _price, _metadataUri);
+    cars[newCarId] = Car(_owner, newCarId, _licensePlate, _chassisNumber, _brand, _carType, _colour, _mileage, false, address(0), _price, _metadataUri, true);
 
     return newCarId;
   }
@@ -70,13 +74,12 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId the ID of the car being purchased
   /// @dev Requires that the car with the given token exists, is not already sold, and that the buyer is not the owner of the car
   function buyCar(uint256 _tokenId) public payable {
-    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
+    require(_exists(_tokenId), CarDealershipStrings.CAR_DOES_NOT_EXIST);
     Car storage _car = cars[_tokenId];
 
-    address _owner = ownerOf(_tokenId);
-    require(_owner != msg.sender, CANT_BUY_OWN_CAR);
-    require(!_car.sold, CAR_ALREADY_SOLD);
-    require(msg.value >= _car.price, INSUFFICIENT_FUNDS);
+    require(ownerOf(_tokenId) != msg.sender, CarDealershipStrings.CANT_BUY_OWN_CAR);
+    require(!_car.sold, CarDealershipStrings.CAR_ALREADY_SOLD);
+    require(msg.value >= _car.price, CarDealershipStrings.INSUFFICIENT_FUNDS);
 
     _car.sold = true;
     _car.buyer = msg.sender;
@@ -89,16 +92,14 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId the ID of the car being purchased
   function cancelCarOrder(uint256 _tokenId) public {
   // TODO: After cancelation check what happens with the money
-    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
+    require(_exists(_tokenId), CarDealershipStrings.CAR_DOES_NOT_EXIST);
     Car storage _car = cars[_tokenId];
-    require(_car.sold, CAR_NOT_SOLD);
-    require(msg.sender == _car.buyer, ONLY_BUYER_CANCEL);
-
-    uint256 _price = _car.price * 1 ether;
+    require(_car.sold, CarDealershipStrings.CAR_NOT_SOLD);
+    require(msg.sender == _car.buyer, CarDealershipStrings.ONLY_BUYER_CANCEL);
 
     // Transfer the money back to the buyer
-    (bool _sent, ) = payable(_car.buyer).call{value: _price}("");
-    require(_sent, FAILED_TO_SENT_ETHER);
+    (bool _sent, ) = payable(_car.buyer).call{value: _car.price * 1 ether}("");
+    require(_sent, CarDealershipStrings.FAILED_TO_SENT_ETHER);
 
     // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
@@ -110,30 +111,25 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId The ID of the car to retrieve
   function retrieveCar(uint256 _tokenId) public payable {
     // Check if the car exists
-    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
+    require(_exists(_tokenId), CarDealershipStrings.CAR_DOES_NOT_EXIST);
     // Retrieve the car and check the sold status and the buyer
     Car storage _car = cars[_tokenId];
-    require(_car.sold, CAR_NOT_SOLD);
-    require(msg.sender == _car.buyer, ONLY_BUYER);
-
-    address _owner = ownerOf(_tokenId);
-    address _buyer = _car.buyer;
+    require(_car.sold, CarDealershipStrings.CAR_NOT_SOLD);
+    require(msg.sender == _car.buyer, CarDealershipStrings.ONLY_BUYER);
 
     // Get the price of the car in WEI
-    uint256 _price = _car.price * 1 ether;
-
     // Transfer the price of the car to the original owner
-    (bool sent, ) = payable(_owner).call{value: _price}("");
-    require(sent, FAILED_TO_SENT_ETHER);
+    (bool sent, ) = payable(ownerOf(_tokenId)).call{value: _car.price * 1 ether}("");
+    require(sent, CarDealershipStrings.FAILED_TO_SENT_ETHER);
 
     // Transfer the ownership of the car to the buyer
-    _safeTransfer(_owner, _buyer, _tokenId, "");
+    _safeTransfer(ownerOf(_tokenId), _car.buyer, _tokenId, "");
 
     // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
     _car.buyer = address(0);
     _car.price = 0;
-    _car.owner = _buyer;
+    _car.owner = _car.buyer;
   }
 
   /// @notice Get the car data associated with the given token ID
@@ -141,7 +137,7 @@ contract CarDealership is Ownable, ERC721Enumerable {
   /// @param _tokenId The ID of the car to retrieve
   /// @return Car The Car associated with the token
   function getCarByToken(uint256 _tokenId) public view returns (Car memory) {
-    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
+    require(_exists(_tokenId), CarDealershipStrings.CAR_DOES_NOT_EXIST);
 
     return cars[_tokenId];
   }
@@ -179,14 +175,21 @@ contract CarDealership is Ownable, ERC721Enumerable {
     return _cars;
   }
 
-  /// @notice Allows the owner of a car to change its mileage
-  /// @param _tokenId The ID of the car to retrieve
-  /// @param _mileage The new mileage of the car
-  /// @return The updated Car object
-  function changeMileage(uint256 _tokenId, uint256 _mileage) public returns (Car memory) {
-    require(_exists(_tokenId), CAR_DOES_NOT_EXIST);
-    Car storage _car = cars[_tokenId];
-    _car.mileage = _mileage;
-    return _car;
+  function addMileageReport(uint256 _token, uint256 _mileageNumber, uint256 _time) external {
+    require(_mileageNumber > cars[_token].mileage, "You need a higher mileage number!");
+    mileageHistory[_token].push(Mileage(_token, _mileageNumber, _time));
+    cars[_token].mileage = _mileageNumber;
+  }
+
+  function getCarMileageHistory(uint256 _token) external view returns (Mileage[] memory) {
+    return mileageHistory[_token];
+  }
+
+  function changeCarPrice(uint256 _token, uint256 _price) public {
+    cars[_token].price = _price;
+  }
+
+  function changeCarAvailability(uint256 _token, bool _availability) external {
+    cars[_token].forSale = _availability;
   }
 }
