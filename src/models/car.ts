@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import BigNumber from 'bignumber.js'
 
 type TokenMetaData = {
   _hex: String
@@ -135,6 +135,6 @@ export default class Car {
    * @returns A decimal number.
    */
   static hexConverter(hex: string) {
-    return parseInt(hex, 16)
+    return new BigNumber(hex).toNumber()
   }
 }
