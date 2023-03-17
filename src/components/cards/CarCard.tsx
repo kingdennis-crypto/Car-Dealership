@@ -59,7 +59,7 @@ export default function CarCard({ car }: CarProp) {
       <div className="my-2">
         <div className="flex flex-row justify-between">
           <p>
-            {car.brand} {car.carType}
+            {car.brand} - {car.carType}
           </p>
           <p>{car.mileage}KM</p>
         </div>
