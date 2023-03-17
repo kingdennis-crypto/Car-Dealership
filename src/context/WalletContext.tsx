@@ -120,7 +120,6 @@ export function WalletProvider({ children }: Props) {
     }
   }
 
-  // TODO: Add a functionality to call a view function without being signed in
   async function callContractFunction(functionName: any, ...args: any[]) {
     try {
       if (!contract) {

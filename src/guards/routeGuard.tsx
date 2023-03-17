@@ -65,7 +65,6 @@ export default function RouteGuard({ children }: Props): ReactNode {
     const restrictedPaths: string[] = ['profile', 'cars']
 
     // FIXME: If the guard throws out from cars/1 it will query parameter as cars/[token]. Try to fix this by getting the [token] from the URL
-    console.log(router)
     if (restrictedPaths.includes(url) && !address) {
       setAuthorized(false)
       router.push({

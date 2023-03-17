@@ -29,7 +29,6 @@ export default function AddCar() {
       images: file,
     }
 
-    // console.log(defaultCar === car)
     const uri = await storage.upload(metadata)
 
     // TODO: Do a check for if the car is not the same as the defaultCar
