@@ -1,6 +1,8 @@
 import Head from 'next/head'
 import CarCard from '@/components/cards/CarCard'
 import { useWallet } from '@/context/WalletContext'
+import Image from 'next/image'
+import emptyGarage from '../../images/empty-garage.svg'
 
 import Car from '@/models/car'
 
@@ -26,13 +28,29 @@ export default function MyCars() {
   return (
     <>
       <Head>
-        <title>All Cars</title>
+        <title>My Cars</title>
       </Head>
       <div>
-        <div className="grid grid-cols-4 gap-6">
-          {cars.map((item, index) => (
-            <CarCard key={index} car={item} />
-          ))}
+        <div
+          className={
+            cars.length
+              ? 'grid grid-cols-4 gap-6'
+              : 'flex items-center justify-center'
+          }
+        >
+          {cars.length ? (
+            cars.map((item, index) => <CarCard key={index} car={item} />)
+          ) : (
+            <div className="bg-white px-4 py-8 rounded-md mt-8 max-w-4xl flex flex-col items-center text-center space-y-4">
+              <Image
+                src={emptyGarage}
+                alt="emtpy garage"
+                width={400}
+                height={400}
+              />
+              <p className="mt-4 text-2xl">Empty garage</p>
+            </div>
+          )}
         </div>
       </div>
     </>
