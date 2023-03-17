@@ -22,13 +22,19 @@ type EditMenuDetail = {
   isOpen: boolean
 }
 
+// TODO: Change mileage so that only a car dealer can add it. Add a few hardcoded wallets, check in context if wallet is car dealer. Or in backend.
+
 export default function LicensePlate() {
   const storage = new ThirdwebStorage()
   const router = useRouter()
 
   const { token } = router.query
-  const { callContractFunction, address, callContractFunctionWithEthers } =
-    useWallet()
+  const {
+    callContractFunction,
+    address,
+    callContractFunctionWithEthers,
+    dealership,
+  } = useWallet()
 
   const [car, setCar] = useState<Car>()
   const [mileage, setMileage] = useState<number>(0)
@@ -183,45 +189,48 @@ export default function LicensePlate() {
                 <p>{car?.price} ETH</p>
               </div>
             </div>
-            {car?.owner === address && (
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="p-2 border-2 hover:bg-gray-100 rounded-md aspect-square"
-              >
-                <svg
-                  aria-hidden="true"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-12 h-12"
+            {car?.owner === address ||
+              (address === dealership && (
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="p-2 border-2 hover:bg-gray-100 rounded-md aspect-square"
                 >
-                  <path
-                    d="M6 13.5V3.75m0 9.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 9.75V10.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                </svg>
-              </button>
-            )}
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-12 h-12"
+                  >
+                    <path
+                      d="M6 13.5V3.75m0 9.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 9.75V10.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></path>
+                  </svg>
+                </button>
+              ))}
           </div>
           <hr className="my-4" />
           {isEditing && (
             <>
               <div className="flex flex-row gap-2">
-                <button
-                  onClick={() =>
-                    setEditMenu({
-                      title: 'Add mileage report',
-                      type: 1,
-                      isOpen: true,
-                    })
-                  }
-                  className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                >
-                  Add Mileage
-                </button>
+                {address === dealership && (
+                  <button
+                    onClick={() =>
+                      setEditMenu({
+                        title: 'Add mileage report',
+                        type: 1,
+                        isOpen: true,
+                      })
+                    }
+                    className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                  >
+                    Add Mileage
+                  </button>
+                )}
                 <button
                   onClick={() =>
                     setEditMenu({

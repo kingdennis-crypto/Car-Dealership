@@ -15,7 +15,7 @@ type FilterOptions = {
 }
 
 export default function Cars() {
-  const { callContractFunction } = useWallet()
+  const { callContractFunction, dealership, address } = useWallet()
 
   const [cars, setCars] = useState<Car[]>([])
   const [filterData, setFilterData] = useState<FilterOptions>({
@@ -35,11 +35,14 @@ export default function Cars() {
 
   async function getAllCars() {
     const _data: Car[] = await callContractFunction('getAllCars')
-    console.log(_data)
-    const _cars = _data
-      .map((element: Car) => Car.fromArray(element))
-      .filter((element: Car) => element.forSale === true)
-    setCars(_cars)
+
+    const _cars = _data.map((element: Car) => Car.fromArray(element))
+
+    if (address !== dealership) {
+      setCars(_cars.filter((element: Car) => element.forSale === true))
+    } else {
+      setCars(_cars)
+    }
   }
 
   async function filterCars() {
