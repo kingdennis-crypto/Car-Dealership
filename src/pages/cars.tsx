@@ -36,6 +36,8 @@ export default function Cars() {
   async function getAllCars() {
     const _data: Car[] = await callContractFunction('getAllCars')
 
+    if (!_data) return
+
     const _cars = _data.map((element: Car) => Car.fromArray(element))
 
     if (address !== dealership) {

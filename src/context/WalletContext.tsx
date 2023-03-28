@@ -189,7 +189,7 @@ export function WalletProvider({ children }: Props) {
     functionName: string,
     value: ethers.BigNumberish,
     ...args: any[]
-  ) {
+  ): Promise<ethers.providers.TransactionReceipt | null> {
     try {
       if (!contract) {
         console.error('Contract not initialized')

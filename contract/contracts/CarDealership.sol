@@ -104,7 +104,6 @@ contract CarDealership is Ownable, ERC721Enumerable {
     // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
     _car.buyer = address(0);
-    _car.price = 0;
   }
 
   /// @notice Allows the buyer to retrieve the purchased car.
@@ -128,8 +127,8 @@ contract CarDealership is Ownable, ERC721Enumerable {
     // Reset the car's sold status, buyer, price, and owner
     _car.sold = false;
     _car.buyer = address(0);
-    _car.price = 0;
-    _car.owner = _car.buyer;
+    _car.owner = msg.sender;
+    _car.forSale = false;
   }
 
   /// @notice Get the car data associated with the given token ID
@@ -192,4 +191,6 @@ contract CarDealership is Ownable, ERC721Enumerable {
   function changeCarAvailability(uint256 _token, bool _availability) external {
     cars[_token].forSale = _availability;
   }
+
+  // TODO: Add function to add dealership and add modifier to check if wallet is dealership
 }

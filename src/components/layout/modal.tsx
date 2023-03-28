@@ -5,7 +5,7 @@ type Props = {
   isOpen: boolean
   title: string
   onClose: () => void
-  footer: React.ReactNode
+  footer?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -17,10 +17,6 @@ export default function Modal({
   children,
 }: Props) {
   return (
-    // <Dialog open={isOpen} onClose={onClose}>
-    //   <Dialog.Panel>{children}</Dialog.Panel>
-    // </Dialog>
-
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
         <Transition.Child
@@ -55,16 +51,7 @@ export default function Modal({
                 </Dialog.Title>
 
                 <>{children}</>
-                <div className="mt-4 flex flex-row">
-                  {footer}
-                  {/* <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    onClick={onClose}
-                  >
-                    Got it, thanks!
-                  </button> */}
-                </div>
+                {footer && <div className="mt-4 flex flex-row">{footer}</div>}
               </Dialog.Panel>
             </Transition.Child>
           </div>
